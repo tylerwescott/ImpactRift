@@ -6,8 +6,8 @@ import random
 pygame.init()
 
 # Constants
-WIDTH, HEIGHT = 500, 300  # Width and height of the window
-ROWS, COLS = 3, 5         # Number of rows and columns in the game board
+WIDTH, HEIGHT = 600, 400  # Adjust the width and height of the window
+ROWS, COLS = 4, 6         # Number of rows and columns in the game board
 SQUARE_SIZE = WIDTH // COLS  # Size of each square
 
 # Colors
