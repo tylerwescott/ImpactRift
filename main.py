@@ -37,11 +37,13 @@ non_special_images = [blank_square, mountain_square, plains_square]
 # Function to check if a river square can be placed at (row, col)
 def can_place_river(board, row, col):
     directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # Up, down, left, right
+    adjacent_rivers = 0
     for dr, dc in directions:
         r, c = row + dr, col + dc
-        if 0 <= r < ROWS and 0 <= c < COLS and board[r][c] == river_square:
-            return True
-    return False
+        if 0 <= r < ROWS and 0 <= c < COLS:
+            if board[r][c] == river_square:
+                adjacent_rivers += 1
+    return adjacent_rivers == 1
 
 # Function to check if an ocean square can be placed at (row, col)
 def can_place_ocean(board, row, col):
