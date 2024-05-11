@@ -20,13 +20,15 @@ pygame.display.set_caption("Impact Rift")
 # Load images
 blank_square = pygame.image.load('images/blank_square.png').convert()
 mountain_square = pygame.image.load('images/mountain_square.png').convert()
+river_square = pygame.image.load('images/river_square.png').convert()
 
 # Scale images to fit squares
 blank_square = pygame.transform.scale(blank_square, (SQUARE_SIZE, SQUARE_SIZE))
 mountain_square = pygame.transform.scale(mountain_square, (SQUARE_SIZE, SQUARE_SIZE))
+river_square = pygame.transform.scale(river_square, (SQUARE_SIZE, SQUARE_SIZE))
 
 # List of possible images
-images = [blank_square, mountain_square]
+images = [blank_square, mountain_square, river_square]
 
 # Function to generate the initial board
 def generate_board():
