@@ -18,8 +18,8 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Impact Rift")
 
 # Load images
-blank_square = pygame.image.load('blank_square.png').convert()
-mountain_square = pygame.image.load('mountain_square.png').convert()
+blank_square = pygame.image.load('images/blank_square.png').convert()
+mountain_square = pygame.image.load('images/mountain_square.png').convert()
 
 # Scale images to fit squares
 blank_square = pygame.transform.scale(blank_square, (SQUARE_SIZE, SQUARE_SIZE))
