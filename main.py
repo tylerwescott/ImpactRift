@@ -17,12 +17,15 @@ WHITE = (255, 255, 255)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Impact Rift")
 
-# Load images
+# Load images from the 'images' directory
 blank_square = pygame.image.load('images/blank_square.png').convert()
 mountain_square = pygame.image.load('images/mountain_square.png').convert()
 river_square = pygame.image.load('images/river_square.png').convert()
 ocean_square = pygame.image.load('images/ocean_square.png').convert()
 plains_square = pygame.image.load('images/plains_square.png').convert()
+forest_square = pygame.image.load('images/forest_square.png').convert()
+desert_square = pygame.image.load('images/desert_square.png').convert()
+tundra_square = pygame.image.load('images/tundra_square.png').convert()
 
 # Scale images to fit squares
 blank_square = pygame.transform.scale(blank_square, (SQUARE_SIZE, SQUARE_SIZE))
@@ -30,9 +33,12 @@ mountain_square = pygame.transform.scale(mountain_square, (SQUARE_SIZE, SQUARE_S
 river_square = pygame.transform.scale(river_square, (SQUARE_SIZE, SQUARE_SIZE))
 ocean_square = pygame.transform.scale(ocean_square, (SQUARE_SIZE, SQUARE_SIZE))
 plains_square = pygame.transform.scale(plains_square, (SQUARE_SIZE, SQUARE_SIZE))
+forest_square = pygame.transform.scale(forest_square, (SQUARE_SIZE, SQUARE_SIZE))
+desert_square = pygame.transform.scale(desert_square, (SQUARE_SIZE, SQUARE_SIZE))
+tundra_square = pygame.transform.scale(tundra_square, (SQUARE_SIZE, SQUARE_SIZE))
 
 # List of possible non-river, non-ocean images
-non_special_images = [blank_square, mountain_square, plains_square]
+non_special_images = [blank_square, mountain_square, plains_square, forest_square, desert_square, tundra_square]
 
 # Function to check if a river square can be placed at (row, col)
 def can_place_river(board, row, col):
