@@ -1,5 +1,6 @@
 import pygame
 import sys
+import random
 
 # Initialize Pygame
 pygame.init()
@@ -17,15 +18,27 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Impact Rift")
 
 # Load images
-# Replace 'square_large.png' with the path to the downloaded image file
-image = pygame.image.load('square.png').convert()
-image = pygame.transform.scale(image, (SQUARE_SIZE, SQUARE_SIZE))
+blank_square = pygame.image.load('blank_square.png').convert()
+mountain_square = pygame.image.load('mountain_square.png').convert()
+
+# Scale images to fit squares
+blank_square = pygame.transform.scale(blank_square, (SQUARE_SIZE, SQUARE_SIZE))
+mountain_square = pygame.transform.scale(mountain_square, (SQUARE_SIZE, SQUARE_SIZE))
+
+# List of possible images
+images = [blank_square, mountain_square]
+
+# Function to generate the initial board
+def generate_board():
+    return [[random.choice(images) for _ in range(COLS)] for _ in range(ROWS)]
+
+# Generate the initial board
+board = generate_board()
 
 def draw_board():
     for row in range(ROWS):
         for col in range(COLS):
-            # Draw the image on each square
-            screen.blit(image, (col * SQUARE_SIZE, row * SQUARE_SIZE))
+            screen.blit(board[row][col], (col * SQUARE_SIZE, row * SQUARE_SIZE))
 
 # Main loop
 running = True
