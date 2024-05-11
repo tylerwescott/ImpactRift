@@ -22,15 +22,17 @@ blank_square = pygame.image.load('images/blank_square.png').convert()
 mountain_square = pygame.image.load('images/mountain_square.png').convert()
 river_square = pygame.image.load('images/river_square.png').convert()
 ocean_square = pygame.image.load('images/ocean_square.png').convert()
+plains_square = pygame.image.load('images/plains_square.png').convert()
 
 # Scale images to fit squares
 blank_square = pygame.transform.scale(blank_square, (SQUARE_SIZE, SQUARE_SIZE))
 mountain_square = pygame.transform.scale(mountain_square, (SQUARE_SIZE, SQUARE_SIZE))
 river_square = pygame.transform.scale(river_square, (SQUARE_SIZE, SQUARE_SIZE))
 ocean_square = pygame.transform.scale(ocean_square, (SQUARE_SIZE, SQUARE_SIZE))
+plains_square = pygame.transform.scale(plains_square, (SQUARE_SIZE, SQUARE_SIZE))
 
 # List of possible non-river, non-ocean images
-non_special_images = [blank_square, mountain_square]
+non_special_images = [blank_square, mountain_square, plains_square]
 
 # Function to check if a river square can be placed at (row, col)
 def can_place_river(board, row, col):
@@ -49,7 +51,6 @@ def can_place_ocean(board, row, col):
         if 0 <= r < ROWS and 0 <= c < COLS and board[r][c] == ocean_square:
             return True
     return False
-
 
 # Function to generate the initial board
 def generate_board():
@@ -91,6 +92,12 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        elif event.type == pygame.MOUSEBUTTONDOWN:  # Check for mouse click event
+            mouse_x, mouse_y = event.pos
+            clicked_row = mouse_y // SQUARE_SIZE
+            clicked_col = mouse_x // SQUARE_SIZE
+            if 0 <= clicked_row < ROWS and 0 <= clicked_col < COLS:
+                board[clicked_row][clicked_col] = mountain_square  # Change the tile to a mountain
 
     screen.fill(WHITE)  # Fill the screen with white color
     draw_board()  # Draw the game board
