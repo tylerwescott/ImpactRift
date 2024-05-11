@@ -27,12 +27,27 @@ blank_square = pygame.transform.scale(blank_square, (SQUARE_SIZE, SQUARE_SIZE))
 mountain_square = pygame.transform.scale(mountain_square, (SQUARE_SIZE, SQUARE_SIZE))
 river_square = pygame.transform.scale(river_square, (SQUARE_SIZE, SQUARE_SIZE))
 
-# List of possible images
-images = [blank_square, mountain_square, river_square]
+# List of possible non-river images
+non_river_images = [blank_square, mountain_square]
+
+# Function to check if a river square can be placed at (row, col)
+def can_place_river(board, row, col):
+    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # Up, down, left, right
+    for dr, dc in directions:
+        r, c = row + dr, col + dc
+        if 0 <= r < ROWS and 0 <= c < COLS and board[r][c] == river_square:
+            return True
+    return False
 
 # Function to generate the initial board
 def generate_board():
-    return [[random.choice(images) for _ in range(COLS)] for _ in range(ROWS)]
+    board = [[random.choice(non_river_images) for _ in range(COLS)] for _ in range(ROWS)]
+    for row in range(ROWS):
+        for col in range(COLS):
+            if random.choice([True, False]):  # Randomly decide to attempt to place a river
+                if can_place_river(board, row, col) or (row == 0 and col == 0):  # Allow first square to be river
+                    board[row][col] = river_square
+    return board
 
 # Generate the initial board
 board = generate_board()
