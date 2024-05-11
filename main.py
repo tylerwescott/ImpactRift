@@ -6,8 +6,8 @@ import random
 pygame.init()
 
 # Constants
-WIDTH, HEIGHT = 600, 400  # Adjust the width and height of the window
-ROWS, COLS = 4, 6         # Number of rows and columns in the game board
+WIDTH, HEIGHT = 800, 600  # Adjust the width and height of the window
+ROWS, COLS = 6, 8         # Number of rows and columns in the game board
 SQUARE_SIZE = WIDTH // COLS  # Size of each square
 
 # Colors
@@ -53,14 +53,31 @@ def can_place_ocean(board, row, col):
 # Function to generate the initial board
 def generate_board():
     board = [[random.choice(non_special_images) for _ in range(COLS)] for _ in range(ROWS)]
-    for row in range(ROWS):
-        for col in range(COLS):
-            if random.choice([True, False]):  # Randomly decide to attempt to place a river
-                if can_place_river(board, row, col) or (row == 0 and col == 0):  # Allow first square to be river
-                    board[row][col] = river_square
-            elif random.choice([True, False]):  # Randomly decide to attempt to place an ocean
-                if can_place_ocean(board, row, col) or (row == 0 and col == 0):  # Allow first square to be ocean
-                    board[row][col] = ocean_square
+
+    place_rivers = random.choice([True, False])
+    place_oceans = random.choice([True, False])
+
+    if place_rivers:
+        # Choose a random starting location for a river
+        river_start_row, river_start_col = random.randint(0, ROWS - 1), random.randint(0, COLS - 1)
+        board[river_start_row][river_start_col] = river_square
+        for row in range(ROWS):
+            for col in range(COLS):
+                if board[row][col] in non_special_images:  # Only attempt to place if the square is not already set
+                    if random.choice([True, False]):  # Randomly decide to attempt to place a river
+                        if can_place_river(board, row, col):
+                            board[row][col] = river_square
+
+    if place_oceans:
+        # Choose a random starting location for an ocean
+        ocean_start_row, ocean_start_col = random.randint(0, ROWS - 1), random.randint(0, COLS - 1)
+        board[ocean_start_row][ocean_start_col] = ocean_square
+        for row in range(ROWS):
+            for col in range(COLS):
+                if board[row][col] in non_special_images:  # Only attempt to place if the square is not already set
+                    if random.choice([True, False]):  # Randomly decide to attempt to place an ocean
+                        if can_place_ocean(board, row, col):
+                            board[row][col] = ocean_square
     return board
 
 # Generate the initial board
