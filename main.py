@@ -87,18 +87,6 @@ except pygame.error as e:
     print(f"Failed to load an image: {e}")
     sys.exit(1)
 
-# List of element names
-element_names = {
-    fire_square: "Fire",
-    light_square: "Light",
-    air_square: "Air",
-    water_square: "Water",
-    dark_square: "Dark",
-    earth_square: "Earth",
-    push_square: "Push",
-    pull_square: "Pull"
-}
-
 # List of all possible images and their types
 all_images = [
     (blank_square, "Blank"), (mountain_square, "Mountain"), (river_square, "River"), (ocean_square, "Ocean"),
@@ -111,25 +99,35 @@ all_images = [
 non_special_images = [
     blank_square, mountain_square, plains_square, forest_square, desert_square, tundra_square, volcano_square,
     meadow_square, plateau_square, swamp_square, canyon_square
+    # Include grasslands in non_special_images
 ]
 
 # List of element images and their corresponding land types
 element_to_land = {
-    fire_square: volcano_square,
-    light_square: meadow_square,
-    air_square: mountain_square,
-    push_square: plateau_square,
-    water_square: ocean_square,
-    dark_square: swamp_square,
-    earth_square: forest_square,
-    pull_square: canyon_square
+    fire_square: volcano_square,  # Volcano represents Fire
+    light_square: meadow_square,  # Grasslands represents Light
+    air_square: mountain_square,  # Mountain represents Air
+    push_square: plateau_square,  # Plateau represents Push
+    water_square: ocean_square,  # Ocean represents Water
+    dark_square: swamp_square,  # Swamp represents Dark
+    earth_square: forest_square,  # Forest represents Earth
+    pull_square: canyon_square  # Canyon represents Pull
 }
 
-# List of element images
-element_images = list(element_to_land.keys())
+# List of element names
+element_names = {
+    fire_square: "Fire",
+    light_square: "Light",
+    air_square: "Air",
+    water_square: "Water",
+    dark_square: "Dark",
+    earth_square: "Earth",
+    push_square: "Push",
+    pull_square: "Pull"
+}
 
 # Define HAND_SIZE after element_images is defined
-HAND_SIZE = len(element_images)
+HAND_SIZE = len(element_to_land)
 
 
 # Function to draw a hexagon
@@ -198,7 +196,7 @@ board = generate_board()
 
 # Function to generate the player's hand
 def generate_hand():
-    return element_images
+    return list(element_to_land.keys())
 
 
 # Generate the player's hand
@@ -242,24 +240,6 @@ def display_tooltip(messages, position, color):
         screen.blit(text, (position[0], position[1] + y_offset))
         y_offset += text.get_height() + 2
 
-# Updated function to get the type of square (element or land) at (row, col)
-def get_square_type(tile):
-    for image, name in all_images:
-        if tile == image:
-            return name
-    for image, name in element_names.items():
-        if tile == image:
-            return name
-    return "Unknown"
-
-# Function to get the type of element and the corresponding land type
-def get_element_and_land_type(element_tile):
-    for element, land in element_to_land.items():
-        if element_tile == element:
-            element_name = get_square_type(element)
-            land_name = get_square_type(land)
-            return element_name, land_name
-    return "Unknown", "Unknown"
 
 # Function to draw outlines for valid positions
 def draw_valid_outlines(valid_positions):
@@ -272,6 +252,28 @@ def draw_valid_outlines(valid_positions):
         if col % 2 == 1:
             y += HEX_RADIUS * math.sqrt(3) / 2  # Offset for odd columns
         draw_hexagon(screen, GREEN, x, y, HEX_RADIUS, border_width=3)
+
+
+# Function to get the type of square at (row, col)
+def get_square_type(tile):
+    for image, name in all_images:
+        if tile == image:
+            return name
+    for image, name in element_names.items():
+        if tile == image:
+            return name
+    return "Unknown"
+
+
+# Function to get the type of element and the corresponding land type
+def get_element_and_land_type(element_tile):
+    for element, land in element_to_land.items():
+        if element_tile == element:
+            element_name = element_names.get(element, "Unknown")
+            land_name = get_square_type(land)
+            return element_name, land_name
+    return "Unknown", "Unknown"
+
 
 # Main loop
 running = True
@@ -296,14 +298,11 @@ while running:
                                 if board[row][col] is not None:
                                     if selected_tile == river_square:
                                         valid, _ = can_place_river(board, row, col)
-                                        if valid:
-                                            valid_positions.append((row, col))
                                     elif selected_tile == ocean_square:
                                         valid, _ = can_place_ocean(board, row, col)
-                                        if valid:
-                                            valid_positions.append((row, col))
-                                    elif selected_tile not in [river_square, ocean_square] and board[row][
-                                        col] != selected_tile:
+                                    else:
+                                        valid = board[row][col] != selected_tile
+                                    if valid:
                                         valid_positions.append((row, col))
             elif 0 <= mouse_x < WIDTH and 0 <= mouse_y < HEIGHT and selected_tile:
                 for row in range(len(board)):
@@ -326,8 +325,14 @@ while running:
                                         board[row][col] = selected_tile  # Place the selected ocean tile on the board
                                 elif selected_tile in element_to_land:
                                     land_tile = element_to_land[selected_tile]
-                                    valid = True
-                                    board[row][col] = land_tile  # Place the corresponding land tile on the board
+                                    if selected_tile == water_square:
+                                        valid, reason = can_place_ocean(board, row, col)
+                                    elif selected_tile == river_square:
+                                        valid, reason = can_place_river(board, row, col)
+                                    else:
+                                        valid = True
+                                    if valid:
+                                        board[row][col] = land_tile  # Place the corresponding land tile on the board
                                 else:
                                     valid = False
                                     reason = "A {} square is already here".format(get_square_type(selected_tile))
