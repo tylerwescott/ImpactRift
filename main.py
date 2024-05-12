@@ -21,6 +21,7 @@ BLACK = (0, 0, 0)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Impact Rift")
 
+
 # Helper function to calculate hexagon points
 def hexagon_points(center_x, center_y, radius):
     points = []
@@ -31,6 +32,7 @@ def hexagon_points(center_x, center_y, radius):
         points.append((x, y))
     return points
 
+
 # Helper function to create a hexagon mask
 def create_hex_mask(radius):
     mask = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
@@ -40,17 +42,20 @@ def create_hex_mask(radius):
     pygame.draw.polygon(mask, (255, 255, 255, 255), points)
     return mask
 
+
 # Helper function to apply a mask to an image
 def apply_hex_mask(image, mask):
     masked_image = image.copy()
     masked_image.blit(mask, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
     return masked_image
 
+
 # Scale images to fit hexagons and apply mask
 def scale_and_mask_image(image, radius):
     scaled_image = pygame.transform.scale(image, (int(2 * radius), int(2 * radius)))
     mask = create_hex_mask(radius)
     return apply_hex_mask(scaled_image, mask)
+
 
 # Load and process images
 try:
@@ -67,9 +72,32 @@ try:
     plateau_square = scale_and_mask_image(pygame.image.load('images/plateau_square.png').convert_alpha(), HEX_RADIUS)
     swamp_square = scale_and_mask_image(pygame.image.load('images/swamp_square.png').convert_alpha(), HEX_RADIUS)
     canyon_square = scale_and_mask_image(pygame.image.load('images/canyon_square.png').convert_alpha(), HEX_RADIUS)
+
+    # Load the element images
+    fire_square = scale_and_mask_image(pygame.image.load('images/fire_square.png').convert_alpha(), HEX_RADIUS)
+    light_square = scale_and_mask_image(pygame.image.load('images/light_square.png').convert_alpha(), HEX_RADIUS)
+    air_square = scale_and_mask_image(pygame.image.load('images/air_square.png').convert_alpha(), HEX_RADIUS)
+    water_square = scale_and_mask_image(pygame.image.load('images/water_square.png').convert_alpha(), HEX_RADIUS)
+    dark_square = scale_and_mask_image(pygame.image.load('images/dark_square.png').convert_alpha(), HEX_RADIUS)
+    earth_square = scale_and_mask_image(pygame.image.load('images/earth_square.png').convert_alpha(), HEX_RADIUS)
+    push_square = scale_and_mask_image(pygame.image.load('images/push_square.png').convert_alpha(), HEX_RADIUS)
+    pull_square = scale_and_mask_image(pygame.image.load('images/pull_square.png').convert_alpha(), HEX_RADIUS)
+
 except pygame.error as e:
     print(f"Failed to load an image: {e}")
     sys.exit(1)
+
+# List of element names
+element_names = {
+    fire_square: "Fire",
+    light_square: "Light",
+    air_square: "Air",
+    water_square: "Water",
+    dark_square: "Dark",
+    earth_square: "Earth",
+    push_square: "Push",
+    pull_square: "Pull"
+}
 
 # List of all possible images and their types
 all_images = [
@@ -85,13 +113,30 @@ non_special_images = [
     meadow_square, plateau_square, swamp_square, canyon_square
 ]
 
-# Define HAND_SIZE after non_special_images is defined
-HAND_SIZE = len(all_images)
+# List of element images and their corresponding land types
+element_to_land = {
+    fire_square: volcano_square,
+    light_square: meadow_square,
+    air_square: mountain_square,
+    push_square: plateau_square,
+    water_square: ocean_square,
+    dark_square: swamp_square,
+    earth_square: forest_square,
+    pull_square: canyon_square
+}
+
+# List of element images
+element_images = list(element_to_land.keys())
+
+# Define HAND_SIZE after element_images is defined
+HAND_SIZE = len(element_images)
+
 
 # Function to draw a hexagon
-def draw_hexagon(surface, color, center_x, center_y, radius):
+def draw_hexagon(surface, color, center_x, center_y, radius, border_width=0):
     points = hexagon_points(center_x, center_y, radius)
-    pygame.draw.polygon(surface, color, points, 0)
+    pygame.draw.polygon(surface, color, points, border_width)
+
 
 # Function to check if a river hex can be placed at (row, col)
 def can_place_river(board, row, col):
@@ -109,6 +154,7 @@ def can_place_river(board, row, col):
     else:
         return False, "A river hex must be adjacent to exactly one other river hex"
 
+
 # Function to check if an ocean hex can be placed at (row, col)
 def can_place_ocean(board, row, col):
     if board[row][col] == ocean_square:
@@ -119,6 +165,7 @@ def can_place_ocean(board, row, col):
         if 0 <= r < len(board) and 0 <= c < len(board[row]) and board[r][c] == ocean_square:
             return True, ""
     return False, "An ocean hex must be adjacent to at least one other ocean hex"
+
 
 # Function to generate the initial board
 def generate_board():
@@ -144,17 +191,21 @@ def generate_board():
     ]
     return board
 
+
 # Generate the initial board
 board = generate_board()
 
+
 # Function to generate the player's hand
 def generate_hand():
-    return [image for image, name in all_images]
+    return element_images
+
 
 # Generate the player's hand
 hand = generate_hand()
 selected_tile = None  # Track the currently selected tile from the hand
 valid_positions = []  # Track valid positions for the selected tile
+
 
 # Function to draw the game board and the player's hand
 def draw_board():
@@ -181,6 +232,7 @@ def draw_board():
         draw_hexagon(screen, WHITE, x, y, HEX_RADIUS)
         screen.blit(tile, (x - HEX_RADIUS, y - HEX_RADIUS))
 
+
 # Function to display the tooltip
 def display_tooltip(messages, position, color):
     font = pygame.font.Font(None, 24)
@@ -189,6 +241,25 @@ def display_tooltip(messages, position, color):
         text = font.render(message, True, color)
         screen.blit(text, (position[0], position[1] + y_offset))
         y_offset += text.get_height() + 2
+
+# Updated function to get the type of square (element or land) at (row, col)
+def get_square_type(tile):
+    for image, name in all_images:
+        if tile == image:
+            return name
+    for image, name in element_names.items():
+        if tile == image:
+            return name
+    return "Unknown"
+
+# Function to get the type of element and the corresponding land type
+def get_element_and_land_type(element_tile):
+    for element, land in element_to_land.items():
+        if element_tile == element:
+            element_name = get_square_type(element)
+            land_name = get_square_type(land)
+            return element_name, land_name
+    return "Unknown", "Unknown"
 
 # Function to draw outlines for valid positions
 def draw_valid_outlines(valid_positions):
@@ -200,14 +271,7 @@ def draw_valid_outlines(valid_positions):
         y = offset_y + row * (math.sqrt(3) * HEX_RADIUS)  # Adjusted for additional rows
         if col % 2 == 1:
             y += HEX_RADIUS * math.sqrt(3) / 2  # Offset for odd columns
-        draw_hexagon(screen, GREEN, x, y, HEX_RADIUS)
-
-# Function to get the type of square at (row, col)
-def get_square_type(square):
-    for image, name in all_images:
-        if square == image:
-            return name
-    return "Unknown"
+        draw_hexagon(screen, GREEN, x, y, HEX_RADIUS, border_width=3)
 
 # Main loop
 running = True
@@ -260,10 +324,10 @@ while running:
                                     valid, reason = can_place_ocean(board, row, col)
                                     if valid:
                                         board[row][col] = selected_tile  # Place the selected ocean tile on the board
-                                elif selected_tile not in [river_square, ocean_square] and board[row][
-                                    col] != selected_tile:
+                                elif selected_tile in element_to_land:
+                                    land_tile = element_to_land[selected_tile]
                                     valid = True
-                                    board[row][col] = selected_tile  # Place the selected tile on the board
+                                    board[row][col] = land_tile  # Place the corresponding land tile on the board
                                 else:
                                     valid = False
                                     reason = "A {} square is already here".format(get_square_type(selected_tile))
@@ -307,8 +371,8 @@ while running:
                                     messages.append("Valid placement")
                                 else:
                                     messages.append(f"Invalid placement: {reason}")
-                            else:
-                                if board[row][col] != selected_tile:
+                            elif selected_tile in element_to_land:
+                                if board[row][col] != element_to_land[selected_tile]:
                                     messages.append("Valid placement")
                                 else:
                                     messages.append("Invalid placement: This tile is already here")
@@ -320,8 +384,8 @@ while running:
         for i in range(HAND_SIZE):
             hand_x = hand_start_x + i * (HEX_RADIUS * 2 + PADDING)
             if hand_x <= mouse_x < hand_x + HEX_RADIUS * 2:
-                tile_type = get_square_type(hand[i])
-                display_tooltip([f"Tile type: {tile_type}"], (mouse_x + 15, mouse_y), BLACK)
+                element_name, land_name = get_element_and_land_type(hand[i])
+                display_tooltip([f"Element: {element_name}", f"Creates: {land_name}"], (mouse_x + 15, mouse_y), BLACK)
 
     pygame.display.flip()  # Update the display
 
