@@ -73,18 +73,33 @@ try:
     swamp_square = scale_and_mask_image(pygame.image.load('images/swamp_square.png').convert_alpha(), HEX_RADIUS)
     canyon_square = scale_and_mask_image(pygame.image.load('images/canyon_square.png').convert_alpha(), HEX_RADIUS)
 
-    # Load the element images
-    fire_square = scale_and_mask_image(pygame.image.load('images/fire_square.png').convert_alpha(), HEX_RADIUS)
-    light_square = scale_and_mask_image(pygame.image.load('images/light_square.png').convert_alpha(), HEX_RADIUS)
-    air_square = scale_and_mask_image(pygame.image.load('images/air_square.png').convert_alpha(), HEX_RADIUS)
-    water_square = scale_and_mask_image(pygame.image.load('images/water_square.png').convert_alpha(), HEX_RADIUS)
-    dark_square = scale_and_mask_image(pygame.image.load('images/dark_square.png').convert_alpha(), HEX_RADIUS)
-    earth_square = scale_and_mask_image(pygame.image.load('images/earth_square.png').convert_alpha(), HEX_RADIUS)
-    push_square = scale_and_mask_image(pygame.image.load('images/push_square.png').convert_alpha(), HEX_RADIUS)
-    pull_square = scale_and_mask_image(pygame.image.load('images/pull_square.png').convert_alpha(), HEX_RADIUS)
+    # Load the element images without masks
+    fire_square = pygame.image.load('images/fire_square.png').convert_alpha()
+    fire_square = pygame.transform.scale(fire_square, (int(2 * HEX_RADIUS), int(2 * HEX_RADIUS)))
+
+    light_square = pygame.image.load('images/light_square.png').convert_alpha()
+    light_square = pygame.transform.scale(light_square, (int(2 * HEX_RADIUS), int(2 * HEX_RADIUS)))
+
+    air_square = pygame.image.load('images/air_square.png').convert_alpha()
+    air_square = pygame.transform.scale(air_square, (int(2 * HEX_RADIUS), int(2 * HEX_RADIUS)))
+
+    water_square = pygame.image.load('images/water_square.png').convert_alpha()
+    water_square = pygame.transform.scale(water_square, (int(2 * HEX_RADIUS), int(2 * HEX_RADIUS)))
+
+    dark_square = pygame.image.load('images/dark_square.png').convert_alpha()
+    dark_square = pygame.transform.scale(dark_square, (int(2 * HEX_RADIUS), int(2 * HEX_RADIUS)))
+
+    earth_square = pygame.image.load('images/earth_square.png').convert_alpha()
+    earth_square = pygame.transform.scale(earth_square, (int(2 * HEX_RADIUS), int(2 * HEX_RADIUS)))
+
+    push_square = pygame.image.load('images/push_square.png').convert_alpha()
+    push_square = pygame.transform.scale(push_square, (int(2 * HEX_RADIUS), int(2 * HEX_RADIUS)))
+
+    pull_square = pygame.image.load('images/pull_square.png').convert_alpha()
+    pull_square = pygame.transform.scale(pull_square, (int(2 * HEX_RADIUS), int(2 * HEX_RADIUS)))
 
 except pygame.error as e:
-    print(f"Failed to load an image: {e}")
+    print(f"Error loading image: {e}")
     sys.exit(1)
 
 # List of all possible images and their types
