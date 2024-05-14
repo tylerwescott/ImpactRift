@@ -99,13 +99,12 @@ all_images = [
 non_special_images = [
     blank_square, mountain_square, plains_square, forest_square, desert_square, tundra_square, volcano_square,
     meadow_square, plateau_square, swamp_square, canyon_square
-    # Include grasslands in non_special_images
 ]
 
 # List of element images and their corresponding land types
 element_to_land = {
     fire_square: volcano_square,  # Volcano represents Fire
-    light_square: meadow_square,  # Grasslands represents Light
+    light_square: meadow_square,  # Meadow represents Light
     air_square: mountain_square,  # Mountain represents Air
     push_square: plateau_square,  # Plateau represents Push
     water_square: ocean_square,  # Ocean represents Water
@@ -134,35 +133,6 @@ HAND_SIZE = len(element_to_land)
 def draw_hexagon(surface, color, center_x, center_y, radius, border_width=0):
     points = hexagon_points(center_x, center_y, radius)
     pygame.draw.polygon(surface, color, points, border_width)
-
-
-# Function to check if a river hex can be placed at (row, col)
-def can_place_river(board, row, col):
-    if board[row][col] == river_square:
-        return False, "A river hex is already here"
-    directions = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, 1), (1, -1)]  # Adjust for hex grid
-    adjacent_rivers = 0
-    for dr, dc in directions:
-        r, c = row + dr, col + dc
-        if 0 <= r < len(board) and 0 <= c < len(board[row]):
-            if board[r][c] == river_square:
-                adjacent_rivers += 1
-    if adjacent_rivers == 1:
-        return True, ""
-    else:
-        return False, "A river hex must be adjacent to exactly one other river hex"
-
-
-# Function to check if an ocean hex can be placed at (row, col)
-def can_place_ocean(board, row, col):
-    if board[row][col] == ocean_square:
-        return False, "An ocean hex is already here"
-    directions = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, 1), (1, -1)]  # Adjust for hex grid
-    for dr, dc in directions:
-        r, c = row + dr, col + dc
-        if 0 <= r < len(board) and 0 <= c < len(board[row]) and board[r][c] == ocean_square:
-            return True, ""
-    return False, "An ocean hex must be adjacent to at least one other ocean hex"
 
 
 # Function to generate the initial board
@@ -285,7 +255,7 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        elif event.type == pygame.MOUSEBUTTONDOWN:  # Check for mouse click event
+        elif event.type == pygame.MOUSEBUTTONDOWN:
             if hand_start_y <= mouse_y < hand_start_y + HEX_RADIUS * 2:
                 for i in range(HAND_SIZE):
                     hand_x = hand_start_x + i * (HEX_RADIUS * 2 + PADDING)
@@ -296,12 +266,7 @@ while running:
                         for row in range(len(board)):
                             for col in range(len(board[row])):
                                 if board[row][col] is not None:
-                                    if selected_tile == river_square:
-                                        valid, _ = can_place_river(board, row, col)
-                                    elif selected_tile == ocean_square:
-                                        valid, _ = can_place_ocean(board, row, col)
-                                    else:
-                                        valid = board[row][col] != selected_tile
+                                    valid = board[row][col] != selected_tile
                                     if valid:
                                         valid_positions.append((row, col))
             elif 0 <= mouse_x < WIDTH and 0 <= mouse_y < HEIGHT and selected_tile:
@@ -315,30 +280,9 @@ while running:
                             if col % 2 == 1:
                                 y += HEX_RADIUS * math.sqrt(3) / 2  # Offset for odd columns
                             if math.sqrt((mouse_x - x) ** 2 + (mouse_y - y) ** 2) <= HEX_RADIUS:
-                                if selected_tile == river_square:
-                                    valid, reason = can_place_river(board, row, col)
-                                    if valid:
-                                        board[row][col] = selected_tile  # Place the selected river tile on the board
-                                elif selected_tile == ocean_square:
-                                    valid, reason = can_place_ocean(board, row, col)
-                                    if valid:
-                                        board[row][col] = selected_tile  # Place the selected ocean tile on the board
-                                elif selected_tile in element_to_land:
-                                    land_tile = element_to_land[selected_tile]
-                                    if selected_tile == water_square:
-                                        valid, reason = can_place_ocean(board, row, col)
-                                    elif selected_tile == river_square:
-                                        valid, reason = can_place_river(board, row, col)
-                                    else:
-                                        valid = True
-                                    if valid:
-                                        board[row][col] = land_tile  # Place the corresponding land tile on the board
-                                else:
-                                    valid = False
-                                    reason = "A {} square is already here".format(get_square_type(selected_tile))
-
-                                # Clear selection and valid positions after placement
-                                if valid:
+                                # Place the corresponding land tile on the board, not the element image
+                                if selected_tile in element_to_land:
+                                    board[row][col] = element_to_land[selected_tile]
                                     selected_tile = None
                                     valid_positions = []
 
@@ -363,25 +307,7 @@ while running:
                     if math.sqrt((mouse_x - x) ** 2 + (mouse_y - y) ** 2) <= HEX_RADIUS:
                         square_type = get_square_type(board[row][col])
                         messages = [f"Square type: {square_type}"]
-                        if selected_tile:
-                            if selected_tile == river_square:
-                                valid, reason = can_place_river(board, row, col)
-                                if valid:
-                                    messages.append("Valid placement")
-                                else:
-                                    messages.append(f"Invalid placement: {reason}")
-                            elif selected_tile == ocean_square:
-                                valid, reason = can_place_ocean(board, row, col)
-                                if valid:
-                                    messages.append("Valid placement")
-                                else:
-                                    messages.append(f"Invalid placement: {reason}")
-                            elif selected_tile in element_to_land:
-                                if board[row][col] != element_to_land[selected_tile]:
-                                    messages.append("Valid placement")
-                                else:
-                                    messages.append("Invalid placement: This tile is already here")
-                        display_tooltip(messages, (mouse_x + 15, mouse_y), RED if "Invalid" in messages[-1] else GREEN)
+                        display_tooltip(messages, (mouse_x + 15, mouse_y), BLACK)
                         break
 
     # Display the tooltip for the hand
